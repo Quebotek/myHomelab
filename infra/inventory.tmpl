@@ -1,0 +1,14 @@
+[all:vars]
+ansible_user=debian
+ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+
+[monitoring]
+${zabbix_ip}
+
+[kubernetes]
+%{ for ip in k8s_ips ~}
+${ip}
+%{ endfor ~}
+
+[kubernetes:vars]
+k3s_role=server
