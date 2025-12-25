@@ -20,3 +20,4 @@
   become: yes
   roles:
     - k3s
+    - longhorn

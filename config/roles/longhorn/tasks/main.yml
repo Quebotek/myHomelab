@@ -1,0 +1,22 @@
+---
+- name: Installation des dépendances stockage (iSCSI / NFS)
+  apt:
+    name:
+      - open-iscsi
+      - nfs-common
+      - cryptsetup
+      - dmsetup
+    state: present
+
+- name: Activation du service iSCSI
+  service:
+    name: iscsid
+    state: started
+    enabled: yes
+
+- name: Téléchargement et Application du Manifeste Longhorn
+  shell: |
+    kubectl apply -f https://raw.githubusercontent.com/longhorn/longhorn/v1.6.2/deploy/longhorn.yaml
+  when: inventory_hostname == groups['kubernetes'][0]
+  args:
+    creates: /var/lib/longhorn
