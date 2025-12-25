@@ -1,0 +1,10 @@
+---
+- name: Configuration Globale
+  hosts: all
+  become: yes
+  vars:
+    zabbix_server_ip: "{{ groups['monitoring'][0] }}"
+
+  roles:
+    - common
+    - zabbix-agent

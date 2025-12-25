@@ -1,0 +1,23 @@
+- name: Mise à jour du cache APT
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Installation des paquets essentiels
+  apt:
+    name:
+      - curl
+      - wget
+      - git
+      - htop
+      - nano        
+      - vim       
+      - net-tools
+      - gnupg2
+      - ca-certificates
+      - lsb-release
+    state: present
+
+- name: Configuration de la Timezone (Paris)
+  timezone:
+    name: Europe/Paris
