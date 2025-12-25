@@ -1,0 +1,10 @@
+---
+- name: Copie du manifeste Vaultwarden sur le Master
+  template:
+    src: manifest.yaml.j2
+    dest: /tmp/vaultwarden.yaml
+  when: inventory_hostname == groups['kubernetes'][0]
+
+- name: Application du manifeste dans Kubernetes
+  shell: kubectl apply -f /tmp/vaultwarden.yaml
+  when: inventory_hostname == groups['kubernetes'][0]

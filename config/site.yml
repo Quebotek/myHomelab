@@ -21,3 +21,4 @@
   roles:
     - k3s
     - longhorn
+    - vaultwarden
