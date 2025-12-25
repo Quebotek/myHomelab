@@ -1,6 +1,7 @@
 [all:vars]
 ansible_user=debian
 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+ansible_ssh_private_key_file=~/.ssh/cle_homelab
 
 [monitoring]
 ${zabbix_ip}
