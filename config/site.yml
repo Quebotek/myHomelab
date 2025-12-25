@@ -14,3 +14,9 @@
   become: yes
   roles:
     - zabbix-server
+      
+- name: Installation du Cluster K3s
+  hosts: kubernetes
+  become: yes
+  roles:
+    - k3s

@@ -1,4 +1,28 @@
 ---
+
+- name: Installation du paquet locales
+  apt:
+    name: locales
+    state: present
+
+- name: Activation de la locale en_US.UTF-8 dans le fichier de config
+  lineinfile:
+    path: /etc/locale.gen
+    regexp: '^# en_US.UTF-8 UTF-8'
+    line: 'en_US.UTF-8 UTF-8'
+  register: locale_en_enabled
+
+- name: Génération des locales (Si changement)
+  command: locale-gen
+  when: locale_en_enabled.changed
+  notify: Restart Apache
+
+- name: Assurer que en_US.UTF-8 est disponible
+  locale_gen:
+    name: en_US.UTF-8
+    state: present
+  ignore_errors: yes 
+
 - name: Installation des pré-requis Python pour MySQL
   apt:
     name: python3-pymysql
