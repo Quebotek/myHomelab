@@ -8,3 +8,9 @@
   roles:
     - common
     - zabbix-agent
+      
+- name: Installation du Serveur de Monitoring
+  hosts: monitoring
+  become: yes
+  roles:
+    - zabbix-server

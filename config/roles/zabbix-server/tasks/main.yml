@@ -1,0 +1,77 @@
+---
+- name: Installation des pré-requis Python pour MySQL
+  apt:
+    name: python3-pymysql
+    state: present
+
+- name: Installation de MariaDB (Serveur de base de données)
+  apt:
+    name: mariadb-server
+    state: present
+
+- name: Démarrage de MariaDB
+  service:
+    name: mariadb
+    state: started
+    enabled: yes
+
+- name: Création de la base de données Zabbix
+  community.mysql.mysql_db:
+    name: zabbix
+    encoding: utf8mb4
+    collation: utf8mb4_bin
+    state: present
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+
+- name: Création de l'utilisateur DB Zabbix
+  community.mysql.mysql_user:
+    name: zabbix
+    password: "{{ zabbix_db_password }}"
+    priv: 'zabbix.*:ALL'
+    state: present
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+
+- name: Téléchargement du paquet repository Zabbix
+  get_url:
+    url: "https://repo.zabbix.com/zabbix/6.0/debian/pool/main/z/zabbix-release/zabbix-release_6.0-5+debian12_all.deb"
+    dest: "/tmp/zabbix-release.deb"
+
+- name: Installation du repo Zabbix
+  apt:
+    deb: "/tmp/zabbix-release.deb"
+
+- name: Installation du Serveur Zabbix, Frontend et Agent
+  apt:
+    name:
+      - zabbix-server-mysql
+      - zabbix-frontend-php
+      - zabbix-apache-conf
+      - zabbix-sql-scripts
+    state: present
+    update_cache: yes
+
+- name: Vérification si le schéma DB est déjà importé
+  stat:
+    path: /etc/zabbix/db_import_done
+  register: db_import_flag
+
+- name: Importation du schéma initial Zabbix (Cela peut prendre 1 minute)
+  shell: |
+    zcat /usr/share/zabbix-sql-scripts/mysql/server.sql.gz | mariadb -u zabbix -p'{{ zabbix_db_password }}' zabbix
+    touch /etc/zabbix/db_import_done
+  when: not db_import_flag.stat.exists
+
+- name: Configuration du mot de passe DB dans Zabbix Server
+  lineinfile:
+    path: /etc/zabbix/zabbix_server.conf
+    regexp: '^# DBPassword='
+    line: "DBPassword={{ zabbix_db_password }}"
+  notify: Restart Zabbix Server
+
+- name: Configuration de la Timezone PHP pour Apache
+  lineinfile:
+    path: /etc/zabbix/apache.conf
+    regexp: '# php_value date.timezone Europe/Riga'
+    line: 'php_value date.timezone Europe/Paris'
+  notify: Restart Apache
+
